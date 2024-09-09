@@ -33,7 +33,7 @@ def scan_port(ip, port):
             service = identify_service(port)
             print(f"Port {port}: OPEN - {service}")
         else:
-            pass:
+            pass
             
     except Exception as e:
         print(f"Error scanning port {port}: {e}")
