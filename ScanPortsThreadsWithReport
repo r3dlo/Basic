@@ -1,0 +1,88 @@
+import socket
+from datetime import datetime
+import threading
+
+SERVICES = {
+    21: "FTP",
+    22: "SSH",
+    23: "Telnet",
+    25: "SMTP",
+    53: "DNS",
+    80: "HTTP",
+    110: "POP3",
+    143: "IMAP",
+    443: "HTTPS",
+    3306: "MySQL",
+    5432: "PostgreSQL",
+    3389: "RDP",
+}
+
+# Función para identificar el servicio en un puerto
+def identify_service(port):
+    return SERVICES.get(port, "Unknown Service")
+
+# Función para escanear un puerto específico
+def scan_port(ip, port, output_file):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+
+    try:
+        result = sock.connect_ex((ip, port))
+        if result == 0:
+            service = identify_service(port)
+            message = f"Port {port}: OPEN - {service}"
+            print(message)
+            with open(output_file, 'a') as f:
+                f.write(message + '\n')
+        else:
+            pass  # No hacemos nada si el puerto está cerrado
+    except Exception as e:
+        error_message = f"Error scanning port {port}: {e}"
+        print(error_message)
+        with open(output_file, 'a') as f:
+            f.write(error_message + '\n')
+    finally:
+        sock.close()
+
+# Función para escanear puertos usando hilos
+def threaded_scan_port(ip, port, output_file):
+    thread = threading.Thread(target=scan_port, args=(ip, port, output_file))
+    thread.start()
+    return thread
+
+# Función principal
+def run_port_scan(target_ip, port_range, output_file):
+    print(f"Starting scan on {target_ip}")
+    print(f"Scanning ports: {port_range}")
+    start_time = datetime.now()
+
+    threads = []
+
+    for port in port_range:
+        thread = threaded_scan_port(target_ip, port, output_file)
+        threads.append(thread)
+
+    # Esperar a que todos los hilos terminen
+    for thread in threads:
+        thread.join()
+
+    end_time = datetime.now()
+    total_time = end_time - start_time
+    print(f"Scan completed in {total_time}")
+
+    # Confirmación final
+    with open(output_file, 'a') as f:
+        f.write(f"Scan completed in {total_time}\n")
+
+# Especificamos la IP del objetivo, los puertos a escanear, y el archivo de salida
+if __name__ == "__main__":
+    target_ip = input("Enter the IP address or domain to scan: ")
+    start_port = int(input("Enter start port: "))
+    end_port = int(input("Enter end port: "))
+    output_file = input("Enter the output file name: ")
+
+    port_range = range(start_port, end_port + 1)
+
+    run_port_scan(target_ip, port_range, output_file)
+
+#by r3d
