@@ -1,25 +1,14 @@
-import speedtest
+import os
 
-def wifi_scan():
+def scan_networks():
+    #Ejecutar el comando para escanear redes WiFi
 
-    networks = os.popen("iwlist wlan0 scanning | grep'ESSID'").read()
+    networks = os.popen("iwlist wlan0 scanning | grep 'ESSID'").read()
 
-def speed_test():
-    st = speed_test.Speedtest()
-    print("Seleccionando el mejor servidor...")
+    # mostrar las redes encontradas
 
-    st.get_best_server()
-    print("Midiendo velocidad de descarga...")
+    print("Redes WiFi encontradas: ")
+    print(networks)
 
-    download_speed = st.download() / 1_000_000
-    print (f"Velocidad de descargar: {download_speed:.2f} Mbps")
 
-    print ("Midiendo velocidad de  subida...")
-
-    upload_speed = st.upload() /1_000_000
-    print(f"Velocidad de subida: {upload_speed:.2f} Mbps")
-
-    # Ejecutamos funciones
-
-    wifi_scan()
-    speed_test()
+scan_networks()
